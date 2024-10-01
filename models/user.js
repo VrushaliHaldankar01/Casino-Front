@@ -31,5 +31,10 @@ const User = sequelize.define(
     paranoid: true, // For soft deletes
   }
 );
+// Define associations
+User.hasMany(Gameday, { as: 'supervisedGames', foreignKey: 'supervisor_id' });
+User.hasMany(Gameday, { as: 'cashierGames', foreignKey: 'cashier_id' });
 
+Gameday.belongsTo(User, { as: 'supervisor', foreignKey: 'supervisor_id' });
+Gameday.belongsTo(User, { as: 'cashier', foreignKey: 'cashier_id' });
 module.exports = User;

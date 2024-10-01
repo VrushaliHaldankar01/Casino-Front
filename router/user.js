@@ -1,11 +1,11 @@
 const express = require('express');
 const userService = require('../service/user');
-const app = express();
 const router = express.Router();
 
-router.post(
-  '/register',
+// Register a new user
+router.post('/auth/register', userService.registerUser);
 
-  userService.createUser
-);
+// Authenticate user and return JWT
+router.post('/auth/login', userService.loginUser);
+
 module.exports = router;

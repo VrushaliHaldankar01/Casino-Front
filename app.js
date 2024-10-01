@@ -1,13 +1,20 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
+
+const User = require('./models/user');
+const Counter = require('./models/counter');
+const Vault = require('./models/vault');
+const Transaction = require('./models/transaction');
+const CounterBalance = require('./models/counterBalance');
+const Customer = require('./models/customer');
 
 const sequelize = require('./utils/configdb');
 require('dotenv').config();
-const User = require('./models/user'); // Import your User model
 const userRouter = require('./router/user');
 
 //admin Routes
-const adminRouter = require('./router/admin');
+// const adminRouter = require('./router/admin');
 
 const PORT = process.env.PORT;
 const uri = process.env.URI;
@@ -18,15 +25,26 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests, please try again later.',
+});
+
+app.use(limiter); // Apply to all requests
+
 // Sync the model with the database
-sequelize
-  .sync({ force: false }) // 'force: false' will not drop and recreate the table if it already exists
-  .then(() => {
-    console.log('User model synchronized with the PostgreSQL database.');
-  })
-  .catch((err) => {
-    console.error('Error syncing the User model with the database:', err);
-  });
+const syncModels = async () => {
+  try {
+      await sequelize.sync({ force: false }); // Change to 'force: true' for dropping tables
+      console.log('Models synchronized with the PostgreSQL database.');
+  } catch (err) {
+      console.error('Error syncing models with the database:', err);
+  }
+};
+
+syncModels();
 // User routes
 app.use('/user', userRouter);
 

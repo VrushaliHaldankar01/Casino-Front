@@ -1,50 +1,53 @@
-const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user'); // Sequelize User model
+const User = require('../models/user');
+const logger = require('../utils/logger');
 
-// Create User function
-const createUser = async (req, res) => {
-  try {
-    const { firstName, lastName, email, password, role } = req.body;
+// Register User
+const registerUser = async (req, res) => {
+    const { username, password, role } = req.body;
 
-    // Validate that email and password are provided
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!username || !password || !role) {
+        return res.status(400).json({ error: 'Username, password, and role are required' });
     }
 
-    // Check if the user already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({ error: 'Email already exists' });
+    try {
+        const existingUser = await User.findOne({ where: { username } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Username already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({ username, password: hashedPassword, role });
+
+        logger.info(`User registered: ${username}`);
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (error) {
+        logger.error('Error registering user:', error);
+        res.status(500).send('Server Error');
+    }
+};
+
+// Login User
+const loginUser = async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    try {
+        const user = await User.findOne({ where: { username } });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
 
-    // Create a new user in the database
-    const newUser = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      role,
-    });
-
-    // Generate a JWT token
-    const token = jwt.sign({ userId: newUser.id }, process.env.SECRET, {
-      expiresIn: '1h',
-    });
-
-    // Respond with the newly created user and the token
-    res.json({ token, newUser });
-  } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).send('Server Error');
-  }
+        const token = jwt.sign({ userId: user.user_id, role: user.role }, process.env.SECRET, { expiresIn: '1h' });
+        res.json({ token, user });
+    } catch (error) {
+        console.error('Error logging in user:', error);
+        res.status(500).send('Server Error');
+    }
 };
 
-module.exports = {
-  createUser,
-};
+module.exports = { registerUser, loginUser };

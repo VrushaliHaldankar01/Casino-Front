@@ -1,42 +1,33 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../utils/configdb'); // Import Sequelize instance
+const sequelize = require('../utils/configdb'); 
 
-// Define the User model
-const User = sequelize.define(
-  'User',
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-      allowNull: false,
-    },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    lastName: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+const User = sequelize.define('User', {
+  user_id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  {
-    tableName: 'User', // Ensure the table name is singular 'User' instead of pluralized 'Users'
-    timestamps: false, // If you don’t want Sequelize to automatically add timestamps
+  username: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    unique: true,
+    validate: {
+      len: [5, 50],  // Ensure username is of valid length
+    }
+  },
+  password: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  role: {
+    type: DataTypes.ENUM('admin', 'cashier', 'supervisor'),
+    allowNull: false
   }
-);
+}, {
+  timestamps: true,  // Adds createdAt and updatedAt
+  paranoid: true,  // For soft deletes
+});
+
+
 
 module.exports = User;

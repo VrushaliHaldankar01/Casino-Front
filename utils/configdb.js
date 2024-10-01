@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 
 // Create a Sequelize instance
-const sequelize = new Sequelize('Casino', 'postgres', 'admin', {
+const sequelize = new Sequelize('Casino2', 'postgres', 'admin', {
   host: 'localhost', // or the host address where your PostgreSQL is running
   dialect: 'postgres',
   port: 5432, // Default PostgreSQL port

@@ -41,7 +41,6 @@ router.get('/active', async (req, res) => {
         const activeGameday = await Gameday.findOne({ where: { enddatetime: null } });
         res.json(activeGameday);
     } catch (error) {
-        console.log(error)
         res.status(500).json({ error: 'Error fetching active gameday' });
     }
 });

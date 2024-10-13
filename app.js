@@ -12,6 +12,7 @@ const Customer = require('./models/customer');
 const sequelize = require('./utils/configdb');
 require('dotenv').config();
 const userRouter = require('./router/user');
+const gamedayRouter = require('./router/gameday');
 
 //admin Routes
 // const adminRouter = require('./router/admin');
@@ -47,7 +48,7 @@ const syncModels = async () => {
 syncModels();
 // User routes
 app.use('/user', userRouter);
-
+app.use('/gameday', gamedayRouter);
 app.get('/', (req, res) => {
   res.send('connected to server');
 });

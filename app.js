@@ -20,10 +20,10 @@ const PORT = process.env.PORT;
 const uri = process.env.URI;
 const app = express();
 const cors = require('cors');
+app.use(cors());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors());
 
 
 const limiter = rateLimit({

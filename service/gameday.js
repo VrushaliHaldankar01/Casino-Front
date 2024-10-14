@@ -2,6 +2,7 @@
 const Gameday = require('../models/gameday');
 const User = require('../models/user'); // Make sure to import the User model
 const logger = require('../utils/logger');
+const bcrypt = require("bcrypt")
 
 // Start Gameday
 const startGameday = async (data) => {
@@ -35,22 +36,22 @@ const startGameday = async (data) => {
 };
 
 // End Gameday
-const endGameday = async (id, data) => {
-    const { supervisorUsername, supervisorPassword } = data;
+const endGameday = async (id, supervisorUsername, supervisorPassword) => {
 
     try {
+        console.log("reaches end try amogh",supervisorUsername)
         const supervisor = await User.findOne({ where: { username: supervisorUsername } });
         
         // Verify supervisor credentials
         if (!supervisor || !(await bcrypt.compare(supervisorPassword, supervisor.password))) {
             throw new Error('Invalid supervisor credentials');
         }
-
+        
         const gameday = await Gameday.findByPk(id);
         if (!gameday) {
             throw new Error('Gameday not found');
         }
-
+        
         // Update the gameday to set the end datetime
         gameday.enddatetime = new Date(); // Set current date and time as end datetime
         await gameday.save();
